@@ -6,30 +6,42 @@
 <title>Lesson 5 — Time & Weather</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  .watermark{
-  position:fixed;
-  bottom:12px;
-  right:12px;
-  font-size:12px;
-  font-weight:800;
-  color:rgba(0,0,0,0.15);
-  pointer-events:none;
-  z-index:9999;
-  user-select:none;
-}
 :root{
-  --sky:#0ea5e9; --sky-l:#e0f2fe;
-  --sun:#f59e0b; --sun-l:#fef3c7;
-  --green:#16a34a; --green-l:#dcfce7;
-  --red:#dc2626; --red-l:#fee2e2;
-  --purple:#7c3aed; --purple-l:#ede9fe;
-  --primary:#2563eb; --primary-l:#dbeafe;
+  --sky:#38bdf8; --sky-l:#e0f2fe;
+  --sun:#fbbf24; --sun-l:#fef3c7;
+  -green:#60a5fa; --green-l:#dbeafe;
+  --red:#fb7185; --red-l:#ffe4e6;
+  --purple:#a78bfa; --purple-l:#ede9fe;
+  --primary:#3b82f6; --primary-l:#dbeafe;
   --muted:#64748b; --border:#e2e8f0;
-  --bg:#f0f9ff; --card:#fff;
+  --bg:#f8fbff; --card:#fff;
   --radius:16px; --shadow:0 4px 24px rgba(0,0,0,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:#1e293b;line-height:1.6}
+
+  /* ===== WATERMARK ===== */
+body::before{
+  content:"MS DI ENGLISH";
+
+  position:fixed;
+  inset:0;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-size:120px;
+  font-weight:900;
+  letter-spacing:8px;
+
+  color:rgba(0,0,0,0.03);
+
+  transform:rotate(-30deg);
+
+  pointer-events:none;
+  z-index:0;
+}
 
 /* HERO */
 .hero{background:linear-gradient(135deg,#0369a1 0%,#7c3aed 60%,#0ea5e9 100%);color:#fff;padding:48px 24px 36px;text-align:center;position:relative;overflow:hidden}
@@ -1620,6 +1632,14 @@ buildHw4();
 buildHwWt();
 </script>
 </body>
+  <footer style="
+text-align:center;
+padding:25px;
+font-size:14px;
+font-weight:700;
+color:#64748b;
+background:white;
+border-top:1px solid #e2e8f0;">
+  © 2026 Ms Di English • All Rights Reserved
+</footer>
 </html>
-HTMLEOF
-echo "Done - $(wc -c < /mnt/user-data/outputs/Lesson5_Time_Weather.html) bytes"
