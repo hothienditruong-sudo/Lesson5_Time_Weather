@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5 — Time & Weather</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#0ea5e9; --sky-l:#e0f2fe;
+  --sun:#f59e0b; --sun-l:#fef3c7;
+  --green:#16a34a; --green-l:#dcfce7;
+  --red:#dc2626; --red-l:#fee2e2;
+  --purple:#7c3aed; --purple-l:#ede9fe;
+  --primary:#2563eb; --primary-l:#dbeafe;
+  --muted:#64748b; --border:#e2e8f0;
+  --bg:#f0f9ff; --card:#fff;
+  --radius:16px; --shadow:0 4px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:#1e293b;line-height:1.6}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0369a1 0%,#7c3aed 60%,#0ea5e9 100%);color:#fff;padding:48px 24px 36px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3C/g%3E%3C/svg%3E")}
+.badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);padding:4px 16px;border-radius:100px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-size:clamp(26px,5vw,46px);font-weight:900;margin-bottom:8px;text-shadow:0 2px 16px rgba(0,0,0,.2)}
+.hero p{font-size:15px;opacity:.85;margin-bottom:20px}
+.hero-meta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-meta span{background:rgba(255,255,255,.15);border-radius:100px;padding:5px 16px;font-size:13px;font-weight:700}
+.objectives{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;margin-top:20px;text-align:left;max-width:480px;margin-left:auto;margin-right:auto}
+.objectives p{font-size:13px;margin-bottom:4px;opacity:.9}
+
+/* NAV */
+.nav{background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;padding:0 16px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:13px 16px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
+.nav-btn:hover{color:var(--primary)}
+.nav-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* PART PILLS */
+.part-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.part-tab{padding:8px 20px;border-radius:100px;border:2px solid var(--border);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);transition:all .2s}
+.part-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.part-panel{display:none}
+.part-panel.active{display:block}
+
+/* SECTIONS */
+.section{display:none;padding:28px 20px;max-width:1000px;margin:0 auto}
+.section.active{display:block}
+.section-title{font-size:21px;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.section-sub{color:var(--muted);margin-bottom:22px;font-size:14px}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+
+/* WARMUP IMAGE GAME */
+.img-match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.img-card{border-radius:12px;border:3px solid var(--border);background:#fff;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;text-align:center;padding:14px 8px}
+.img-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.img-card.selected{border-color:var(--sun);background:var(--sun-l)}
+.img-card.correct{border-color:var(--green);background:var(--green-l)}
+.img-card.incorrect{border-color:var(--red);background:var(--red-l);animation:shake .3s}
+.img-card .big-emoji{font-size:38px;display:block;margin-bottom:6px}
+.img-card .img-lbl{font-size:11px;color:var(--muted);font-weight:700}
+.img-card .img-num{position:absolute;top:6px;left:8px;font-size:12px;font-weight:900;color:var(--primary)}
+.answer-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.ans-chip{padding:7px 16px;border-radius:100px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.ans-chip:hover{border-color:var(--primary);background:var(--primary-l);color:var(--primary)}
+.ans-chip.used{opacity:.4;pointer-events:none;text-decoration:line-through}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* CLOCK */
+.clock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;margin-bottom:16px}
+.clock-item{background:#fff;border:2px solid var(--border);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .2s}
+.clock-item:hover{border-color:var(--sky)}
+.clock-item.selected{border-color:var(--sun);background:var(--sun-l)}
+.clock-item.correct{border-color:var(--green);background:var(--green-l)}
+.clock-item.incorrect{border-color:var(--red);background:var(--red-l)}
+.clock-face{width:70px;height:70px;border-radius:50%;border:3px solid #334155;background:#f8fafc;margin:0 auto 8px;position:relative;display:flex;align-items:center;justify-content:center}
+.clock-label{font-size:12px;font-weight:700;color:var(--muted)}
+.clock-display{font-size:13px;font-weight:800;color:var(--primary);margin-top:4px}
+
+/* VFC (vocab flashcards) */
+.vfc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:18px}
+.vfc{height:170px;perspective:800px;cursor:pointer}
+.vfc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s}
+.vfc.flipped .vfc-inner{transform:rotateY(180deg)}
+.vfc-front,.vfc-back{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;text-align:center}
+.vfc-front{background:linear-gradient(135deg,var(--sky-l),var(--purple-l));border:2px solid #bae6fd}
+.vfc-front .ve{font-size:32px;margin-bottom:6px}
+.vfc-front .vw{font-size:14px;font-weight:800;color:var(--primary)}
+.vfc-front .vp{font-size:11px;color:var(--purple);margin-top:3px}
+.vfc-back{background:linear-gradient(135deg,#0369a1,var(--purple));color:#fff;transform:rotateY(180deg)}
+.vfc-back .vm{font-size:13px;font-weight:800;margin-bottom:5px}
+.vfc-back .vex{font-size:11px;opacity:.85;line-height:1.5}
+
+/* TABLE */
+.vocab-table{width:100%;border-collapse:collapse;font-size:13px}
+.vocab-table th{background:var(--primary);color:#fff;padding:11px 13px;text-align:left;font-weight:700;font-size:12px}
+.vocab-table th:first-child{border-radius:10px 0 0 0}
+.vocab-table th:last-child{border-radius:0 10px 0 0}
+.vocab-table td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+.vocab-table tr:nth-child(even) td{background:#f8fafc}
+.vocab-table tr:hover td{background:var(--primary-l)}
+.wrd{font-weight:800;color:var(--primary)}
+.prn{color:var(--purple);font-size:12px}
+.type-badge{display:inline-block;padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase}
+.t-noun{background:#dbeafe;color:#1d4ed8}
+.t-phrase{background:#ede9fe;color:#6d28d9}
+.t-adv{background:#fef3c7;color:#92400e}
+.search-bar input{width:100%;padding:10px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.search-bar input:focus{border-color:var(--primary)}
+
+/* ACTIVITY TABS */
+.act-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.act-tab{padding:7px 16px;border-radius:100px;border:2px solid var(--border);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);transition:all .2s}
+.act-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.act-panel{display:none}
+.act-panel.active{display:block}
+
+/* FILL */
+.fill-s{font-size:15px;line-height:2.5;margin-bottom:12px;padding:14px 18px;background:#f8fafc;border-radius:10px;border-left:4px solid var(--primary)}
+.blank{display:inline-block;border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--primary);width:130px;padding:2px 4px;outline:none;text-align:center}
+.blank.ok{border-bottom-color:var(--green);color:var(--green)}
+.blank.bad{border-bottom-color:var(--red);color:var(--red)}
+
+/* SORT */
+.word-bank{display:flex;flex-wrap:wrap;gap:7px;padding:12px;background:#f1f5f9;border-radius:10px;margin-bottom:10px;min-height:48px}
+.wchip{padding:5px 12px;background:#fff;border:2px solid var(--border);border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;user-select:none;transition:all .2s}
+.wchip:hover{border-color:var(--primary);background:var(--primary-l)}
+.wchip.used{opacity:.35;pointer-events:none}
+.sort-tgt{min-height:44px;border:2px dashed var(--border);border-radius:10px;padding:7px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#fff}
+.placed{padding:4px 11px;background:var(--primary-l);color:var(--primary);border-radius:100px;font-size:12px;font-weight:700;cursor:pointer}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.match-col h3{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:7px}
+.match-item{padding:9px 13px;border-radius:9px;border:2px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;background:#fff;margin-bottom:7px;user-select:none}
+.match-item:hover{border-color:var(--primary);background:var(--primary-l)}
+.match-item.selected{border-color:var(--sun);background:var(--sun-l)}
+.match-item.correct{border-color:var(--green);background:var(--green-l);color:var(--green);pointer-events:none}
+.match-item.incorrect{border-color:var(--red);background:var(--red-l);animation:shake .3s}
+
+/* SELECT DROPDOWN */
+.inline-select{border:2px solid var(--primary);border-radius:8px;padding:3px 8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;outline:none;color:var(--primary);background:var(--primary-l);cursor:pointer}
+.inline-select.ok{border-color:var(--green);background:var(--green-l);color:var(--green)}
+.inline-select.bad{border-color:var(--red);background:var(--red-l);color:var(--red)}
+
+/* QUIZ */
+.quiz-item{margin-bottom:18px}
+.quiz-q{font-size:14px;font-weight:700;margin-bottom:9px}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{padding:9px 14px;border:2px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;background:#fff}
+.quiz-opt:hover:not(.disabled){border-color:var(--primary);background:var(--primary-l)}
+.quiz-opt.correct{border-color:var(--green);background:var(--green-l);color:var(--green)}
+.quiz-opt.incorrect{border-color:var(--red);background:var(--red-l);color:var(--red)}
+.quiz-opt.disabled{pointer-events:none}
+
+/* GRAMMAR */
+.g-box{background:linear-gradient(135deg,var(--sky-l),var(--primary-l));border-radius:14px;padding:18px 22px;margin-bottom:14px;border-left:5px solid var(--sky)}
+.g-box h3{font-size:15px;font-weight:800;margin-bottom:9px;color:#0369a1}
+.g-rule{font-size:14px;padding:7px 0;border-bottom:1px solid rgba(14,165,233,.2)}
+.g-rule:last-child{border-bottom:none}
+.g-hl{color:var(--purple);font-weight:800}
+.weather-box{background:linear-gradient(135deg,#ecfdf5,#e0f2fe);border-radius:14px;padding:18px 22px;margin-bottom:14px;border-left:5px solid var(--green)}
+.weather-box h3{font-size:15px;font-weight:800;margin-bottom:9px;color:var(--green)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:100px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:#1d4ed8;transform:translateY(-1px)}
+.btn-secondary{background:#fff;color:#1e293b;border:2px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.score-b{display:inline-flex;align-items:center;gap:6px;background:var(--green-l);color:var(--green);padding:7px 18px;border-radius:100px;font-weight:800;font-size:14px;margin:8px 0}
+.result-msg{padding:11px 15px;border-radius:9px;font-weight:700;margin-top:10px;font-size:14px}
+.result-msg.ok{background:var(--green-l);color:var(--green)}
+.result-msg.bad{background:var(--red-l);color:var(--red)}
+.prog-wrap{background:var(--border);border-radius:100px;height:5px;margin-bottom:18px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--purple));border-radius:100px;transition:width .5s}
+
+/* WEATHER TABLE */
+.weather-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px}
+.weather-table th{background:var(--sky);color:#fff;padding:10px 13px;font-weight:700;text-align:left}
+.weather-table th:first-child{border-radius:8px 0 0 0}
+.weather-table th:last-child{border-radius:0 8px 0 0}
+.weather-table td{padding:9px 13px;border-bottom:1px solid var(--border)}
+.weather-table tr:nth-child(even) td{background:#f0f9ff}
+
+/* LISTENING */
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:18px;box-shadow:var(--shadow)}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+.audio-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border-radius:100px;text-decoration:none;font-weight:800;font-size:14px;transition:opacity .2s}
+.audio-btn:hover{opacity:.85}
+
+/* DIALOGUE */
+.bubble{max-width:75%;padding:11px 16px;border-radius:16px;font-size:14px;line-height:1.6}
+.bubble-a{background:var(--sky-l);border-bottom-left-radius:3px;align-self:flex-start}
+.bubble-b{background:var(--sun-l);border-bottom-right-radius:3px;align-self:flex-end;text-align:right}
+.bubble-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
+
+/* LISTENING FILL TABLE */
+.listen-table td{padding:6px 10px;border:1px solid var(--border);font-size:13px}
+.listen-table th{background:#f1f5f9;padding:8px 10px;font-size:12px;font-weight:700}
+
+/* HOMEWORK */
+.hw-box{background:#fffbeb;border-left:4px solid var(--sun);border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:14px}
+.hw-box h4{font-size:14px;font-weight:800;color:#92400e;margin-bottom:8px}
+
+@media(max-width:600px){
+  .match-grid{grid-template-columns:1fr}
+  .vfc-grid{grid-template-columns:repeat(2,1fr)}
+  .img-match-grid{grid-template-columns:repeat(2,1fr)}
+  .section{padding:18px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">📘 Lesson 5 · A1 → A2</div>
+  <h1>⏰ Time &amp; 🌤️ Weather</h1>
+  <p>Telling the time · Describing the weather · Days, months &amp; seasons</p>
+  <div class="hero-meta">
+    <span>⏱ 90 minutes</span>
+    <span>🎯 Listening · Speaking</span>
+    <span>👤 1–2 students</span>
+  </div>
+  <div class="objectives">
+    <p>🎯 <strong>By the end of this lesson, you can…</strong></p>
+    <p>✅ Tell the time accurately</p>
+    <p>✅ Ask and answer questions about schedules</p>
+    <p>✅ Describe weather conditions</p>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showSection('warmup',this)">🔥 Khởi động</button>
+  <button class="nav-btn" onclick="showSection('time',this)">⏰ Time</button>
+  <button class="nav-btn" onclick="showSection('weather',this)">🌤️ Weather</button>
+  <button class="nav-btn" onclick="showSection('vocab',this)">📖 Từ mới</button>
+  <button class="nav-btn" onclick="showSection('activities',this)">🎮 Hoạt động</button>
+  <button class="nav-btn" onclick="showSection('listening',this)">🎧 Nghe</button>
+  <button class="nav-btn" onclick="showSection('speaking',this)">🗣️ Nói</button>
+  <button class="nav-btn" onclick="showSection('homework',this)">📝 Homework</button>
+</nav>
+
+<!-- ============================= WARMUP ============================= -->
+<section id="warmup" class="section active">
+  <div class="section-title">🔥 Khởi động</div>
+  <div class="section-sub">Match the picture to the correct phrase, then discuss the warm-up questions!</div>
+
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">🖼️ Match the pictures to the activities (A–F)</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Nhấn một hình → chọn đáp án A–F phù hợp.</p>
+    <div class="img-match-grid" id="wu-imgs"></div>
+    <div style="font-weight:700;font-size:13px;color:var(--muted);margin-bottom:8px;">🔤 Đáp án (A–F):</div>
+    <div class="answer-options" id="wu-answers"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn btn-primary" onclick="checkWarmup()">✅ Kiểm tra</button>
+      <button class="btn btn-secondary" onclick="resetWarmup()">🔄 Thử lại</button>
+    </div>
+    <div id="wu-score" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:14px;">💬 Câu hỏi thảo luận</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:#f0f9ff;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:#0369a1;">1. What time is it now?</div>
+      <div style="background:#f0f9ff;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:#0369a1;">2. Are you usually on time or late?</div>
+      <div style="background:#f0f9ff;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:#0369a1;">3. How long does it take you to get to work / school?</div>
+      <div style="background:#f8fafc;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--green);">4. What is your favorite season? Why?</div>
+      <div style="background:#f8fafc;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--green);">5. What is the weather like today where you live?</div>
+      <div style="background:#f8fafc;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--green);">6. What is your favorite day of the week? Why?</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= TIME ============================= -->
+<section id="time" class="section">
+  <div class="section-title">⏰ PART 1 — TIME</div>
+  <div class="section-sub">Telling the time · Time expressions · Prepositions of time</div>
+
+  <!-- Asking & Telling time -->
+  <div class="g-box">
+    <h3>🕐 Asking & Telling the Time</h3>
+    <div class="g-rule"><span class="g-hl">Hỏi giờ:</span> What time is it? · Do you have the time? · Could you tell me what time it is?</div>
+    <div class="g-rule"><span class="g-hl">o'clock:</span> It's <span class="g-hl">one o'clock</span> = 1:00</div>
+    <div class="g-rule"><span class="g-hl">half past:</span> It's <span class="g-hl">half past 4</span> = 4:30 (bốn giờ rưỡi)</div>
+    <div class="g-rule"><span class="g-hl">a quarter past:</span> It's <span class="g-hl">a quarter past 4</span> = 4:15 (bốn giờ mười lăm phút)</div>
+    <div class="g-rule"><span class="g-hl">a quarter to:</span> It's <span class="g-hl">a quarter to 4</span> = 3:45 (bốn giờ kém mười lăm)</div>
+    <div class="g-rule"><span class="g-hl">A.M. / P.M.:</span> It's 7 A.M. (buổi sáng) · It's 3 P.M. (buổi chiều)</div>
+  </div>
+
+  <!-- Interactive clock reading -->
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:6px;">🕰️ Đọc đồng hồ — Chọn đáp án đúng</div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Nhìn đồng hồ, chọn cách đọc giờ đúng.</p>
+    <div id="clock-quiz"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="checkClockQuiz()">✅ Kiểm tra</button>
+      <button class="btn btn-secondary" onclick="buildClockQuiz()">🔄 Làm lại</button>
+    </div>
+    <div id="clock-result" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- Time prepositions -->
+  <div class="g-box" style="background:linear-gradient(135deg,#fef3c7,#ede9fe);border-left-color:var(--sun);">
+    <h3 style="color:#92400e;">⚠️ Time Prepositions — Giới từ chỉ thời gian hay nhầm</h3>
+    <div class="g-rule"><span class="g-hl">until</span> vs <span class="g-hl">by:</span> I'll be here <span class="g-hl">until</span> 4:30 (tôi ở đây đến tận 4:30) · I'll be there <span class="g-hl">by</span> 8:15 (tôi sẽ có mặt không muộn hơn 8:15)</div>
+    <div class="g-rule"><span class="g-hl">for</span> vs <span class="g-hl">since:</span> I've worked here <span class="g-hl">for</span> six months (khoảng thời gian) · I've worked here <span class="g-hl">since</span> May (điểm thời gian)</div>
+    <div class="g-rule"><span class="g-hl">during</span> vs <span class="g-hl">for:</span> I worked <span class="g-hl">during</span> the summer (khi nào) · I worked <span class="g-hl">for</span> a month (bao lâu)</div>
+    <div class="g-rule"><span class="g-hl">on</span> days: <span class="g-hl">on</span> Monday · <span class="g-hl">on</span> Saturday evening · I saw her <span class="g-hl">on</span> Friday</div>
+    <div class="g-rule"><span class="g-hl">in</span> months/seasons: <span class="g-hl">in</span> July · <span class="g-hl">in</span> spring · My birthday is <span class="g-hl">in</span> July ❌ NOT on July</div>
+    <div class="g-rule"><span class="g-hl">at</span> the weekend: I went to the cinema <span class="g-hl">at</span> the weekend ❌ NOT in the weekend</div>
+  </div>
+
+  <!-- Time units -->
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:12px;">📐 Counting Time — Đơn vị thời gian</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+      <div style="background:var(--sky-l);border-radius:10px;padding:12px;text-align:center;border-top:3px solid var(--sky);">
+        <div style="font-size:24px;margin-bottom:4px;">⏱</div>
+        <div style="font-weight:800;font-size:14px;color:#0369a1;">60 seconds = 1 minute</div>
+      </div>
+      <div style="background:#ede9fe;border-radius:10px;padding:12px;text-align:center;border-top:3px solid var(--purple);">
+        <div style="font-size:24px;margin-bottom:4px;">🕐</div>
+        <div style="font-weight:800;font-size:14px;color:var(--purple);">60 minutes = 1 hour</div>
+      </div>
+      <div style="background:var(--green-l);border-radius:10px;padding:12px;text-align:center;border-top:3px solid var(--green);">
+        <div style="font-size:24px;margin-bottom:4px;">📅</div>
+        <div style="font-weight:800;font-size:14px;color:var(--green);">7 days = 1 week</div>
+      </div>
+      <div style="background:var(--sun-l);border-radius:10px;padding:12px;text-align:center;border-top:3px solid var(--sun);">
+        <div style="font-size:24px;margin-bottom:4px;">📆</div>
+        <div style="font-weight:800;font-size:14px;color:#92400e;">2 weeks = 1 <em>fortnight</em></div>
+      </div>
+      <div style="background:#fce7f3;border-radius:10px;padding:12px;text-align:center;border-top:3px solid #ec4899;">
+        <div style="font-size:24px;margin-bottom:4px;">🗓️</div>
+        <div style="font-weight:800;font-size:14px;color:#be185d;">12 months = 1 year</div>
+      </div>
+      <div style="background:var(--primary-l);border-radius:10px;padding:12px;text-align:center;border-top:3px solid var(--primary);">
+        <div style="font-size:24px;margin-bottom:4px;">📜</div>
+        <div style="font-weight:800;font-size:14px;color:var(--primary);">100 years = 1 century</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;background:#f8fafc;border-radius:9px;padding:12px 16px;font-size:13px;">
+      💡 <strong>Fortnight</strong> /ˈfɔːt.naɪt/ = hai tuần &nbsp;|&nbsp; <strong>Decade</strong> /ˈdek.eɪd/ = thập kỷ (10 năm) &nbsp;|&nbsp; <strong>Millennium</strong> /mɪˈlen.i.əm/ = 1000 năm
+    </div>
+  </div>
+
+  <!-- Days months seasons -->
+  <div class="g-box" style="background:linear-gradient(135deg,#ecfdf5,#f0f9ff);border-left-color:var(--green);">
+    <h3 style="color:var(--green);">📅 Days, Months & Seasons</h3>
+    <div class="g-rule"><span class="g-hl">Days:</span> Sunday · Monday · Tuesday · Wednesday · Thursday · Friday · Saturday <em>(always capital)</em></div>
+    <div class="g-rule"><span class="g-hl">Months:</span> January · February · March · April · May · June · July · August · September · October · November · December</div>
+    <div class="g-rule"><span class="g-hl">Seasons:</span> spring 🌸 · summer ☀️ · autumn/fall 🍂 · winter ❄️ <em>(no capital)</em></div>
+    <div class="g-rule">Saturday + Sunday = <span class="g-hl">the weekend</span></div>
+    <div class="g-rule">We say <span class="g-hl">on</span> + day: <em>on Monday, on Saturday</em> · <span class="g-hl">in</span> + month/season: <em>in July, in spring</em></div>
+  </div>
+
+  <!-- Time expressions -->
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:12px;">💬 Useful Time Expressions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+      <div style="background:#f0f9ff;border-radius:8px;padding:9px 13px;"><strong>in time</strong> — kịp giờ <br><em>We got there in time.</em></div>
+      <div style="background:#f0f9ff;border-radius:8px;padding:9px 13px;"><strong>on time</strong> — đúng giờ <br><em>My brother is always on time.</em></div>
+      <div style="background:#f8fafc;border-radius:8px;padding:9px 13px;"><strong>have time</strong> — có đủ thời gian <br><em>Do you have time for coffee?</em></div>
+      <div style="background:#f8fafc;border-radius:8px;padding:9px 13px;"><strong>next time / last time</strong><br><em>Call me the next time you're in London.</em></div>
+      <div style="background:#f0f9ff;border-radius:8px;padding:9px 13px;"><strong>in a moment</strong> — trong chốc lát<br><em>I'll be with you in a moment.</em></div>
+      <div style="background:#f0f9ff;border-radius:8px;padding:9px 13px;"><strong>at the moment</strong> — ngay lúc này<br><em>Nora's in Paris at the moment.</em></div>
+      <div style="background:#f8fafc;border-radius:8px;padding:9px 13px;"><strong>once/twice a week</strong><br><em>I go swimming once a week.</em></div>
+      <div style="background:#f8fafc;border-radius:8px;padding:9px 13px;"><strong>recently / soon / ago</strong><br><em>I got up four hours ago.</em></div>
+    </div>
+  </div>
+
+  <!-- Grammar quiz -->
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:14px;">🏋️ Grammar Quiz — Time & Prepositions</div>
+    <div class="prog-wrap"><div class="prog-fill" id="tq-prog" style="width:0%"></div></div>
+    <div id="time-quiz"></div>
+    <div id="time-quiz-score" style="margin-top:12px;"></div>
+  </div>
+</section>
+
+<!-- ============================= WEATHER ============================= -->
+<section id="weather" class="section">
+  <div class="section-title">🌤️ PART 2 — WEATHER</div>
+  <div class="section-sub">Weather conditions · Useful expressions · Talking about weather</div>
+
+  <!-- Weather vocab table -->
+  <div class="card" style="padding:0;overflow:auto;">
+    <div style="padding:16px 20px;font-size:15px;font-weight:800;border-bottom:1px solid var(--border);">🌦️ Weather Word Families</div>
+    <table class="weather-table">
+      <thead><tr><th>Noun</th><th>Adjective</th><th>Verb</th><th>Nghĩa</th></tr></thead>
+      <tbody>
+        <tr><td>☀️ sun</td><td>sunny</td><td>the sun is shining</td><td>nắng</td></tr>
+        <tr><td>🌧️ rain</td><td>rainy</td><td>it's raining</td><td>mưa</td></tr>
+        <tr><td>💨 wind</td><td>windy</td><td>the wind is blowing</td><td>gió</td></tr>
+        <tr><td>☁️ cloud</td><td>cloudy</td><td>—</td><td>mây</td></tr>
+        <tr><td>❄️ snow</td><td>snowy</td><td>it's snowing</td><td>tuyết</td></tr>
+        <tr><td>🌫️ fog</td><td>foggy</td><td>—</td><td>sương mù</td></tr>
+        <tr><td>⛈️ thunder</td><td>thundery</td><td>—</td><td>sấm</td></tr>
+        <tr><td>⚡ lightning</td><td>—</td><td>—</td><td>sét / tia chớp</td></tr>
+        <tr><td>🌀 storm</td><td>stormy</td><td>—</td><td>bão + mưa gió</td></tr>
+        <tr><td>🌪️ hurricane</td><td>—</td><td>—</td><td>bão rất mạnh</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Temperature vocab -->
+  <div class="weather-box">
+    <h3>🌡️ Temperature & Other Weather Words</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:10px;font-size:13px;">
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>hot</strong> 🔥<br><em>45°C in Mexico</em></div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>warm</strong> ☀️<br><em>pleasant heat</em></div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>cool</strong> 🍃<br><em>slightly cold</em></div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>cold</strong> ❄️<br><em>-50°C in Arctic</em></div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>wet</strong> 🌧️<br><em>rainy London</em></div>
+      <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;text-align:center;"><strong>dry</strong> 🏜️<br><em>Sahara desert</em></div>
+    </div>
+    <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px 14px;font-size:13px;">
+      ⚠️ <strong>Common mistakes:</strong> It's <span style="color:var(--green);font-weight:700;">windy / cloudy / foggy / sunny</span> ✅ &nbsp;&nbsp; ❌ NOT "It's winding / clouding / sunning"
+    </div>
+  </div>
+
+  <!-- Weather questions & expressions -->
+  <div class="g-box" style="background:linear-gradient(135deg,#e0f2fe,#ecfdf5);border-left-color:#0891b2;">
+    <h3 style="color:#0891b2;">💬 Asking about Weather</h3>
+    <div class="g-rule"><span class="g-hl">What's the weather like?</span> = How's the weather? (hai câu tương đương)</div>
+    <div class="g-rule"><span class="g-hl">What kind of weather do you like?</span> → I like / I don't like …</div>
+    <div class="g-rule"><span class="g-hl">What's the weather like in your country in June?</span> → It's usually warm and sunny.</div>
+    <div class="g-rule"><em>It's a lovely day.</em> / <em>It's a horrible day, isn't it!</em></div>
+    <div class="g-rule"><em>It's foggy in Sydney and it's snowing in Moscow.</em></div>
+    <div class="g-rule"><em>It's raining in Barcelona but the sun is shining in Granada.</em></div>
+  </div>
+
+  <!-- Weather quiz -->
+  <div class="card">
+    <div style="font-size:15px;font-weight:800;margin-bottom:14px;">🌦️ Weather Quiz</div>
+    <div class="prog-wrap"><div class="prog-fill" id="wq-prog" style="width:0%"></div></div>
+    <div id="weather-quiz"></div>
+    <div id="weather-quiz-score" style="margin-top:12px;"></div>
+  </div>
+</section>
+
+<!-- ============================= VOCAB ============================= -->
+<section id="vocab" class="section">
+  <div class="section-title">📖 Từ mới — Vocabulary</div>
+  <div class="section-sub">Nhấn thẻ để lật xem nghĩa & ví dụ. Bảng từ đầy đủ bên dưới.</div>
+  <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px;">👆 Nhấn vào thẻ để lật</p>
+  <div class="vfc-grid" id="vfc-grid"></div>
+  <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-secondary" onclick="flipAll(true)">👁️ Lật tất cả</button>
+    <button class="btn btn-secondary" onclick="flipAll(false)">🔄 Úp lại</button>
+  </div>
+  <div class="search-bar"><input type="text" placeholder="🔍 Tìm từ..." oninput="filterVocab(this.value)"></div>
+  <div class="card" style="padding:0;overflow:auto;">
+    <table class="vocab-table">
+      <thead><tr><th>Word</th><th>Pronunciation</th><th>Type</th><th>Meaning (Nghĩa)</th><th>Example Sentence</th></tr></thead>
+      <tbody id="vtbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================= ACTIVITIES ============================= -->
+<section id="activities" class="section">
+  <div class="section-title">🎮 Hoạt động luyện tập</div>
+  <div class="section-sub">Điền từ · Ghép từ · Sắp xếp câu · Trắc nghiệm · Viết</div>
+
+  <div class="act-tabs">
+    <button class="act-tab active" onclick="showAct('fill',this)">✏️ Điền từ</button>
+    <button class="act-tab" onclick="showAct('match',this)">🔗 Ghép từ</button>
+    <button class="act-tab" onclick="showAct('sort',this)">🔀 Sắp xếp câu</button>
+    <button class="act-tab" onclick="showAct('prep',this)">📌 Giới từ thời gian</button>
+    <button class="act-tab" onclick="showAct('quiz',this)">❓ Trắc nghiệm</button>
+    <button class="act-tab" onclick="showAct('writing',this)">✍️ Viết</button>
+  </div>
+
+  <!-- FILL -->
+  <div class="act-panel active" id="act-fill">
+    <div class="card">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">✏️ Task: Fill in the blanks — Điền từ</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Điền từ/cụm từ thích hợp vào chỗ trống.</p>
+      <div id="fill-qs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn btn-primary" onclick="checkFill()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetFill()">🔄 Làm lại</button>
+      </div>
+      <div id="fill-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- MATCH -->
+  <div class="act-panel" id="act-match">
+    <div class="card">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">🔗 Ghép từ với nghĩa đúng</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Nhấn một từ bên trái → nhấn nghĩa bên phải.</p>
+      <div id="match-score" style="margin-bottom:10px;"></div>
+      <div class="match-grid">
+        <div><h3>🔤 Từ</h3><div id="match-words"></div></div>
+        <div><h3>📖 Nghĩa</h3><div id="match-defs"></div></div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="initMatch()">🔄 Chơi lại</button>
+    </div>
+  </div>
+
+  <!-- SORT -->
+  <div class="act-panel" id="act-sort">
+    <div class="card">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">🔀 Sắp xếp từ thành câu hoàn chỉnh</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Nhấn từng từ theo đúng thứ tự.</p>
+      <div id="sort-qs"></div>
+    </div>
+  </div>
+
+  <!-- PREPOSITIONS -->
+  <div class="act-panel" id="act-prep">
+    <div class="card">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">📌 Chọn giới từ thời gian đúng</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Chọn: <strong>in / on / at / for / since / until / by / during</strong></p>
+      <div id="prep-qs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn btn-primary" onclick="checkPrep()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetPrep()">🔄 Làm lại</button>
+      </div>
+      <div id="prep-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="act-panel" id="act-quiz">
+    <div class="card">
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:14px;">❓ Trắc nghiệm tổng hợp</h3>
+      <div class="prog-wrap"><div class="prog-fill" id="act-quiz-prog" style="width:0%"></div></div>
+      <div id="act-quiz-items"></div>
+      <div id="act-quiz-total" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- WRITING -->
+  <div class="act-panel" id="act-writing">
+    <div class="card">
+      <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:16px 20px;margin-bottom:16px;border-left:5px solid var(--sky);">
+        <h3 style="font-size:15px;font-weight:800;color:#0369a1;margin-bottom:8px;">✍️ Writing Task (120–150 words)</h3>
+        <p style="font-size:13px;color:#0c4a6e;line-height:1.7;">Describe: <strong>your daily routine · your favorite season · the weather in your city · activities you do in that weather</strong></p>
+      </div>
+      <div style="background:#f8fafc;border-radius:9px;padding:12px 16px;margin-bottom:12px;font-size:13px;">
+        <strong>🔗 Useful openers:</strong><br>
+        <em>I usually wake up at… · My favorite season is… because… · In [city], the weather in summer is… · When it rains, I usually… · I love going out when it's…</em>
+      </div>
+      <textarea id="writing-area" style="width:100%;height:180px;padding:14px;border:2px solid var(--border);border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;outline:none;resize:vertical;line-height:1.7;" placeholder="Viết đoạn văn của bạn tại đây..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'" oninput="countWords()"></textarea>
+      <div style="text-align:right;margin-top:5px;font-size:12px;color:var(--muted);"><span id="word-count">0</span> từ / mục tiêu: 120–150</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= LISTENING ============================= -->
+<section id="listening" class="section">
+  <div class="section-title">🎧 Nghe — Listening</div>
+  <div class="section-sub">Hai bài nghe: Daily Routines & Weather</div>
+
+  <div class="part-tabs">
+    <button class="part-tab active" onclick="showPart('listen-time',this)">⏰ Listening 1: Daily Routines</button>
+    <button class="part-tab" onclick="showPart('listen-weather',this)">🌤️ Listening 2: Weather</button>
+  </div>
+
+  <!-- LISTENING 1 -->
+  <div class="part-panel active" id="listen-time">
+    <div class="card">
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/nwnPFxGOxZk" title="Daily Routines Listening" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div style="background:var(--sky-l);border-radius:9px;padding:12px 16px;margin-bottom:16px;font-size:13px;">
+        📌 <strong>Hướng dẫn:</strong> Nghe lần 1 → hoàn thành bảng Task 1. Nghe lần 2 → điền vào chỗ trống Task 2.
+      </div>
+
+      <!-- Task 1: Complete the chart -->
+      <div style="font-size:15px;font-weight:800;margin-bottom:12px;">📋 Task 1: Complete the chart</div>
+      <div style="overflow:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px;">
+          <thead>
+            <tr style="background:var(--primary);">
+              <th style="color:#fff;padding:10px 13px;text-align:left;border-radius:8px 0 0 0;">Person</th>
+              <th style="color:#fff;padding:10px 13px;text-align:left;">Job</th>
+              <th style="color:#fff;padding:10px 13px;text-align:left;">Gets up at…</th>
+              <th style="color:#fff;padding:10px 13px;text-align:left;">Gets home at…</th>
+              <th style="color:#fff;padding:10px 13px;text-align:left;border-radius:0 8px 0 0;">Goes to bed at…</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);font-weight:800;">Rodney</td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);color:var(--muted);font-style:italic;">chef ✓</td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+            </tr>
+            <tr style="background:#f8fafc;">
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);font-weight:800;">Tina</td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);color:var(--muted);font-style:italic;">7:00 A.M. ✓</td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;border-bottom:1px solid var(--border);"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+            </tr>
+            <tr>
+              <td style="padding:9px 13px;font-weight:800;">Ellen</td>
+              <td style="padding:9px 13px;"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+              <td style="padding:9px 13px;color:var(--muted);font-style:italic;">9:00 P.M. ✓</td>
+              <td style="padding:9px 13px;"><input type="text" style="border:none;border-bottom:2px solid var(--primary);background:transparent;font-family:Nunito,sans-serif;font-size:13px;width:100px;outline:none;" placeholder="____"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Task 2: Fill in blanks from transcript -->
+      <div style="font-size:15px;font-weight:800;margin-bottom:10px;">✏️ Task 2: Fill in the blanks</div>
+      <div style="background:#f8fafc;border-radius:10px;padding:16px 18px;font-size:14px;line-height:2.4;margin-bottom:14px;">
+        <strong>Rodney:</strong> I get home <input class="blank" data-ans="quite" placeholder="(1)"> late, about 11 P.M. and I'm usually in bed by one in the morning.<br>
+        <strong>Tina:</strong> Well, I'm an <input class="blank" data-ans="accountant" placeholder="(2)">. It's a regular nine-to-five office job. I like to <input class="blank" data-ans="relax" placeholder="(3)"> at night. I go to bed around <input class="blank" data-ans="midnight" placeholder="(4)"> on weekdays.<br>
+        <strong>Ellen:</strong> I'm a flight <input class="blank" data-ans="attendant" placeholder="(5)">. I start work at six in the morning so I have to <input class="blank" data-ans="get up" placeholder="(6)"> before 5 A.M. Then I often have long <input class="blank" data-ans="shifts" placeholder="(7)">, so I don't get home until nine o'clock at night, but I always go to bed <input class="blank" data-ans="early" placeholder="(8)">, around 10.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="checkListenFill('t2-result')">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetListenFill('t2-result')">🔄 Làm lại</button>
+      </div>
+      <div id="t2-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- LISTENING 2: WEATHER -->
+  <div class="part-panel" id="listen-weather">
+    <div class="card">
+      <div style="background:linear-gradient(135deg,#1e293b,#0369a1);border-radius:12px;padding:20px;color:#fff;margin-bottom:18px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">🎧</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Weather Listening</div>
+        <div style="font-size:12px;opacity:.7;margin-bottom:14px;">Bài nghe về thời tiết từ giáo viên</div>
+        <a href="https://drive.google.com/file/d/1vNnxlmY1UAdEvkdjNiJ5JOCfreyjg540/view?usp=sharing" target="_blank" class="audio-btn">▶️ Mở file nghe</a>
+      </div>
+
+      <div style="font-size:15px;font-weight:800;margin-bottom:10px;">✏️ Task: Fill in the blanks</div>
+      <div style="background:#f0f9ff;border-radius:9px;padding:12px 16px;font-size:13px;margin-bottom:14px;border-left:3px solid var(--sky);">
+        💡 Các từ cần điền: <em>cloudy · fog · sky · cold · sunshine · broke · clear · heavy rain · storm · wind (?)</em>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:16px 18px;font-size:14px;line-height:2.5;margin-bottom:14px;">
+        This morning it was very <input class="blank" id="wf1" data-ans="cloudy" placeholder="(1)">, and many people thought it would rain. Fortunately, the <input class="blank" id="wf2" data-ans="sunshine" placeholder="(2)"> finally <input class="blank" id="wf3" data-ans="broke through" placeholder="(3)"> after lunch, and the temperature rose a little. Yesterday we had <input class="blank" id="wf4" data-ans="heavy rain" placeholder="(4)">, which made driving quite dangerous. Last weekend the weather was even worse: there was <input class="blank" id="wf5" data-ans="fog" placeholder="(5)"> together with a <input class="blank" id="wf6" data-ans="storm" placeholder="(6)">. The wind had <input class="blank" id="wf7" data-ans="broken" placeholder="(7)"> branches off the trees. Today, however, the <input class="blank" id="wf8" data-ans="sky" placeholder="(8)"> is completely <input class="blank" id="wf9" data-ans="clear" placeholder="(9)">. Still, it is <input class="blank" id="wf10" data-ans="cold" placeholder="(10)">, so everyone goes outside wearing coats and scarves.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="checkWeatherFill()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetWeatherFill()">🔄 Làm lại</button>
+      </div>
+      <div id="wf-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= SPEAKING ============================= -->
+<section id="speaking" class="section">
+  <div class="section-title">🗣️ Nói — Speaking</div>
+  <div class="section-sub">Clock reading · Daily routine · Weather interview</div>
+
+  <div class="part-tabs">
+    <button class="part-tab active" onclick="showPart('sp-time',this)">⏰ Đọc đồng hồ</button>
+    <button class="part-tab" onclick="showPart('sp-weather',this)">🌤️ Weather Interview</button>
+  </div>
+
+  <!-- SPEAKING: CLOCK -->
+  <div class="part-panel active" id="sp-time">
+    <div class="card">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">🕐 Task 1: Read the times aloud</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Luyện đọc các giờ dưới đây cho bạn cùng nghe. Bạn kia vẽ lên đồng hồ, sau đó đổi lượt.</p>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:800;color:var(--primary);margin-bottom:10px;">🅰️ Student A — Đọc các giờ sau:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">2:00</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">4:15</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">7:30</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">1:45</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">3:10</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">9:50</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">5:05</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">8:40</span>
+          <span style="background:var(--primary-l);color:var(--primary);padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">6:25</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:14px;font-weight:800;color:var(--sun);margin-bottom:10px;">🅱️ Student B — Đọc các giờ sau:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">2:05</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">3:15</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">9:45</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">5:50</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">8:40</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">6:00</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">4:30</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">7:10</span>
+          <span style="background:var(--sun-l);color:#92400e;padding:6px 14px;border-radius:100px;font-weight:800;font-size:14px;">1:25</span>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:10px;padding:14px 18px;font-size:13px;">
+        <strong>💡 Cách đọc giờ:</strong><br>
+        2:00 → <em>It's two o'clock</em> &nbsp;|&nbsp; 4:15 → <em>It's a quarter past four</em> &nbsp;|&nbsp; 7:30 → <em>It's half past seven</em><br>
+        1:45 → <em>It's a quarter to two</em> &nbsp;|&nbsp; 3:10 → <em>It's ten past three</em> &nbsp;|&nbsp; 9:50 → <em>It's ten to ten</em>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px;">📅 Task 2: Talk about your daily routine</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Nói về lịch trình hàng ngày của bạn: <strong>activity + time</strong></p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#f0f9ff;border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">1. What time do you usually get up on weekdays?</div>
+        <div style="background:#f0f9ff;border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">2. What time do you start work / school?</div>
+        <div style="background:#f0f9ff;border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">3. How long does it take you to get to work?</div>
+        <div style="background:#f0f9ff;border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">4. What time do you have lunch?</div>
+        <div style="background:#f0f9ff;border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">5. What time do you usually go to bed?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPEAKING: WEATHER -->
+  <div class="part-panel" id="sp-weather">
+    <div class="card">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px;">🌤️ Weather Interview</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Hỏi và trả lời theo cặp. Dùng các câu hỏi dưới đây.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <div style="background:var(--sky-l);border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">1. What's your favorite weather?</div>
+        <div style="background:var(--sky-l);border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">2. Which season do you like most? Why?</div>
+        <div style="background:var(--sky-l);border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">3. What do you usually do on rainy days?</div>
+        <div style="background:var(--sky-l);border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">4. Have you ever seen snow? If yes, where?</div>
+        <div style="background:var(--sky-l);border-radius:9px;padding:11px 15px;font-size:14px;font-weight:700;color:#0369a1;">5. What is the weather usually like in your city in July?</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:14px 18px;font-size:13px;margin-bottom:14px;">
+        <strong>💡 Useful language:</strong><br>
+        I love / I don't like … weather. &nbsp;|&nbsp; My favorite season is … because … &nbsp;|&nbsp; When it rains, I usually … &nbsp;|&nbsp; In summer, it's usually hot and … in my city.
+      </div>
+      <textarea style="width:100%;height:120px;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:vertical;" placeholder="Ghi chú câu trả lời của bạn tại đây..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,var(--green-l),#d1fae5);">
+      <div style="font-size:15px;font-weight:800;margin-bottom:12px;">✅ Wrap Up — Kiểm tra bản thân</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"> I can tell the time accurately.</label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"> I can use time prepositions correctly (in / on / at / for / since…).</label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"> I can describe weather using adjectives and nouns.</label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;"> I can ask and answer questions about weather.</label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= HOMEWORK ============================= -->
+<section id="homework" class="section">
+  <div class="section-title">📝 Homework</div>
+  <div class="section-sub">Bài tập về nhà — hoàn thành sau buổi học</div>
+
+  <div class="part-tabs">
+    <button class="part-tab active" onclick="showPart('hw-time',this)">⏰ Homework: Time</button>
+    <button class="part-tab" onclick="showPart('hw-calendar',this)">📅 Days & Months</button>
+    <button class="part-tab" onclick="showPart('hw-weather',this)">🌤️ Homework: Weather</button>
+    <button class="part-tab" onclick="showPart('hw-writing',this)">✍️ Writing Task</button>
+  </div>
+
+  <!-- HW TIME -->
+  <div class="part-panel active" id="hw-time">
+    <div class="hw-box">
+      <h4>📌 Task 1: Vocabulary — Điền từ đơn vị thời gian</h4>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">second · minute · hour · day · week · month · year · fortnight · decade · century · millennium</p>
+      <div id="hw1-qs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" onclick="checkHw1()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetHw1()">🔄 Làm lại</button>
+      </div>
+      <div id="hw1-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 2: Approximate time expressions</h4>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Replace the underlined words with approximate expressions: <strong>for ages · a long time ago · the other day · recently · for the time being</strong></p>
+      <div id="hw2-qs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" onclick="checkHw2()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetHw2()">🔄 Làm lại</button>
+      </div>
+      <div id="hw2-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 3: True or False? Rewrite with correct frequency adverbs</h4>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Nếu câu không đúng với bạn, viết lại dùng frequency adverb khác.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#fff;border-radius:9px;padding:12px 16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;">1. I always go swimming on Fridays.</div>
+          <textarea style="width:100%;height:50px;padding:8px;border:2px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="Your answer..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:12px 16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;">2. I usually go to school / work by bus.</div>
+          <textarea style="width:100%;height:50px;padding:8px;border:2px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="Your answer..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:12px 16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;">3. I often wear a hat.</div>
+          <textarea style="width:100%;height:50px;padding:8px;border:2px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="Your answer..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:12px 16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;">4. I never go to the theatre.</div>
+          <textarea style="width:100%;height:50px;padding:8px;border:2px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="Your answer..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 4: Quick Quiz — How fast can you answer?</h4>
+      <div id="hw4-quiz"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="checkHw4()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="buildHw4()">🔄 Làm lại</button>
+      </div>
+      <div id="hw4-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- HW CALENDAR -->
+  <div class="part-panel" id="hw-calendar">
+    <div class="hw-box">
+      <h4>📌 Task 1: Units of time — Điền đáp án</h4>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;">1. 24 hours = <input class="blank" data-ans="one day" placeholder="____"> </div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;">2. 100 years = <input class="blank" data-ans="one century" placeholder="____"></div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;">3. 2 weeks = <input class="blank" data-ans="a fortnight" placeholder="____"></div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;">4. 60 minutes = <input class="blank" data-ans="one hour" placeholder="____"></div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;">5. 7 days = <input class="blank" data-ans="one week" placeholder="____"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" onclick="checkCalUnit()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetCalUnit()">🔄 Làm lại</button>
+      </div>
+      <div id="cal-unit-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 2: Complete the months song — Điền tên tháng</h4>
+      <div style="background:#fff;border-radius:10px;padding:16px 18px;font-size:14px;line-height:2.5;">
+        🎵 Thirty days has <strong>S</strong><input class="blank" style="width:110px" data-ans="eptember" placeholder="eptember">,<br>
+        <strong>A</strong><input class="blank" style="width:95px" data-ans="pril" placeholder="pril">, <strong>J</strong><input class="blank" style="width:80px" data-ans="une" placeholder="une"> and <strong>N</strong><input class="blank" style="width:110px" data-ans="ovember" placeholder="ovember">.<br>
+        All the rest have <input class="blank" style="width:100px" data-ans="thirty-one" placeholder="thirty-...">,<br>
+        Except for <strong>F</strong><input class="blank" style="width:110px" data-ans="ebruary" placeholder="ebruary">,<br>
+        Which has twenty-eight days, and <input class="blank" style="width:90px" data-ans="twenty-nine" placeholder="twenty-..."> in each leap year.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" onclick="checkSong()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetSong()">🔄 Làm lại</button>
+      </div>
+      <div id="song-result" style="margin-top:10px;"></div>
+      <div style="margin-top:12px;"><a href="https://youtu.be/GjrjMxddJe0" target="_blank" style="color:var(--primary);font-weight:700;font-size:13px;text-decoration:none;">▶️ Nghe bài hát 30 Days Hath September →</a></div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 3: Correct the 6 mistakes</h4>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Tìm và sửa 6 lỗi trong đoạn văn sau (days, months, prepositions):</p>
+      <div style="background:#fff;border-radius:10px;padding:14px 18px;font-size:14px;line-height:1.9;margin-bottom:12px;border-left:4px solid var(--red);">
+        I'm going to a party <em>on saturday</em> for Valentina's birthday. Her birthday is <em>on thursday</em> but she wanted to have the party <em>in the weekend</em>. She's having a barbecue. I think <em>june</em> is a good month to have a birthday because of the weather. I love going to barbecues <em>on the summer</em>. My birthday is <em>in Winter</em> and it's too cold to eat outside!
+      </div>
+      <textarea style="width:100%;height:100px;padding:12px;border:2px solid var(--border);border-radius:9px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:vertical;" placeholder="Viết lại đoạn văn đã sửa lỗi tại đây..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="showMistakeKey()">🔑 Xem đáp án</button>
+      <div id="mistake-key" style="display:none;margin-top:10px;background:var(--green-l);padding:12px 16px;border-radius:9px;font-size:13px;">
+        ✅ <strong>Sửa lỗi:</strong><br>
+        1. <em>saturday</em> → <strong>Saturday</strong><br>
+        2. <em>thursday</em> → <strong>Thursday</strong><br>
+        3. <em>in the weekend</em> → <strong>at the weekend</strong><br>
+        4. <em>june</em> → <strong>June</strong><br>
+        5. <em>on the summer</em> → <strong>in summer</strong><br>
+        6. <em>in Winter</em> → <strong>in winter</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- HW WEATHER -->
+  <div class="part-panel" id="hw-weather">
+    <div class="hw-box">
+      <h4>📌 Task 1: Complete sentences — Điền từ thời tiết</h4>
+      <div id="hw-wt-qs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" onclick="checkHwWt()">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" onclick="resetHwWt()">🔄 Làm lại</button>
+      </div>
+      <div id="hw-wt-result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 2: True / False about weather in your country</h4>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Các câu dưới đây có đúng về thời tiết ở nơi bạn sống không? Nếu không, hãy sửa lại.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#fff;border-radius:9px;padding:11px 14px;font-size:13px;"><strong>1.</strong> It often snows in December. <textarea style="width:100%;height:45px;margin-top:6px;padding:7px;border:2px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="True ✓ / False — correct: ..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <div style="background:#fff;border-radius:9px;padding:11px 14px;font-size:13px;"><strong>2.</strong> It is usually 40°C in summer and -20°C in winter. <textarea style="width:100%;height:45px;margin-top:6px;padding:7px;border:2px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="True ✓ / False — correct: ..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <div style="background:#fff;border-radius:9px;padding:11px 14px;font-size:13px;"><strong>3.</strong> There are thunderstorms every day in August. <textarea style="width:100%;height:45px;margin-top:6px;padding:7px;border:2px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="True ✓ / False — correct: ..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+        <div style="background:#fff;border-radius:9px;padding:11px 14px;font-size:13px;"><strong>4.</strong> We never have hurricanes. <textarea style="width:100%;height:45px;margin-top:6px;padding:7px;border:2px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:13px;outline:none;resize:none;" placeholder="True ✓ / False — correct: ..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></textarea></div>
+      </div>
+    </div>
+
+    <div class="hw-box">
+      <h4>📌 Task 3: What do you like / dislike to do in these types of weather?</h4>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#fff;border-radius:9px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">🌫️</span> <strong>fog</strong> <input type="text" style="flex:1;border:none;border-bottom:2px solid var(--border);font-family:Nunito,sans-serif;font-size:13px;padding:3px 6px;outline:none;" placeholder="I don't like to drive." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></div>
+        <div style="background:#fff;border-radius:9px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">☀️</span> <strong>sunny weather</strong> <input type="text" style="flex:1;border:none;border-bottom:2px solid var(--border);font-family:Nunito,sans-serif;font-size:13px;padding:3px 6px;outline:none;" placeholder="I love to..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></div>
+        <div style="background:#fff;border-radius:9px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">🌧️</span> <strong>a rainy day</strong> <input type="text" style="flex:1;border:none;border-bottom:2px solid var(--border);font-family:Nunito,sans-serif;font-size:13px;padding:3px 6px;outline:none;" placeholder="I usually..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></div>
+        <div style="background:#fff;border-radius:9px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">❄️</span> <strong>snow</strong> <input type="text" style="flex:1;border:none;border-bottom:2px solid var(--border);font-family:Nunito,sans-serif;font-size:13px;padding:3px 6px;outline:none;" placeholder="I like to..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></div>
+        <div style="background:#fff;border-radius:9px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">💨</span> <strong>a windy day</strong> <input type="text" style="flex:1;border:none;border-bottom:2px solid var(--border);font-family:Nunito,sans-serif;font-size:13px;padding:3px 6px;outline:none;" placeholder="I prefer to..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HW WRITING -->
+  <div class="part-panel" id="hw-writing">
+    <div class="card">
+      <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:16px 20px;margin-bottom:16px;border-left:5px solid var(--sky);">
+        <h3 style="font-size:15px;font-weight:800;color:#0369a1;margin-bottom:8px;">✍️ Writing Task — 120–150 words</h3>
+        <p style="font-size:13px;color:#0c4a6e;line-height:1.8;">Describe:</p>
+        <div style="font-size:13px;color:#0c4a6e;line-height:1.9;">
+          • Your daily routine<br>
+          • Your favorite season<br>
+          • The weather in your city<br>
+          • Activities you do in that weather
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:9px;padding:12px 16px;margin-bottom:12px;font-size:13px;">
+        <strong>📌 Example structure:</strong><br>
+        <em>I usually wake up at... My favorite season is... because... In my city, the weather in summer is usually... When it's [weather], I love to... I think the best time of year is...</em>
+      </div>
+      <textarea id="hw-writing-area" style="width:100%;height:200px;padding:14px;border:2px solid var(--border);border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;outline:none;resize:vertical;line-height:1.7;" placeholder="Viết đoạn văn của bạn tại đây..." onfocus="this.style.borderColor='var(--sky)'" onblur="this.style.borderColor='var(--border)'" oninput="countHwWords()"></textarea>
+      <div style="text-align:right;margin-top:5px;font-size:12px;color:var(--muted);"><span id="hw-word-count">0</span> từ / mục tiêu: 120–150</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= JS ============================= -->
+<script>
+// ===== VOCAB DATA =====
+const vocabData = [
+  {w:'second',p:'/ˈsek.ənd/',t:'noun',m:'Giây (1/60 phút)',ex:'It only takes a few <strong>seconds</strong> to send a message.'},
+  {w:'minute',p:'/ˈmɪn.ɪt/',t:'noun',m:'Phút (60 giây)',ex:'The train will arrive in five <strong>minutes</strong>.'},
+  {w:'hour',p:'/aʊər/',t:'noun',m:'Giờ (60 phút)',ex:'She studies English for two <strong>hours</strong> every day.'},
+  {w:'fortnight',p:'/ˈfɔːt.naɪt/',t:'noun',m:'Hai tuần',ex:'The report will be ready in a <strong>fortnight</strong>.'},
+  {w:'decade',p:'/ˈdek.eɪd/',t:'noun',m:'Thập kỷ (10 năm)',ex:'The city changed a lot over the last <strong>decade</strong>.'},
+  {w:'century',p:'/ˈsen.tʃər.i/',t:'noun',m:'Thế kỷ (100 năm)',ex:'This building is more than one <strong>century</strong> old.'},
+  {w:'millennium',p:'/mɪˈlen.i.əm/',t:'noun',m:'Thiên niên kỷ (1000 năm)',ex:'People celebrated the new <strong>millennium</strong> in 2000.'},
+  {w:'on time',p:'/ɒn taɪm/',t:'phrase',m:'Đúng giờ',ex:'My brother is always <strong>on time</strong>.'},
+  {w:'in time',p:'/ɪn taɪm/',t:'phrase',m:'Kịp giờ',ex:'We got to the meeting <strong>in time</strong>.'},
+  {w:'a quarter past',p:'/ə ˈkwɔːtə pɑːst/',t:'phrase',m:'…giờ 15 phút',ex:"It's <strong>a quarter past</strong> four = 4:15."},
+  {w:'half past',p:'/hɑːf pɑːst/',t:'phrase',m:'…giờ rưỡi',ex:"It's <strong>half past</strong> seven = 7:30."},
+  {w:'a quarter to',p:'/ə ˈkwɔːtə tuː/',t:'phrase',m:'…giờ kém 15',ex:"It's <strong>a quarter to</strong> four = 3:45."},
+  {w:'sunny',p:'/ˈsʌn.i/',t:'adj',m:'Có nắng',ex:"It's a <strong>sunny</strong> day in Tokyo."},
+  {w:'cloudy',p:'/ˈklaʊ.di/',t:'adj',m:'Có mây, nhiều mây',ex:"It's <strong>cloudy</strong> in Hong Kong."},
+  {w:'rainy',p:'/ˈreɪ.ni/',t:'adj',m:'Có mưa',ex:"It's a <strong>rainy</strong> day."},
+  {w:'windy',p:'/ˈwɪn.di/',t:'adj',m:'Có gió',ex:"It's very <strong>windy</strong> today."},
+  {w:'foggy',p:'/ˈfɒɡ.i/',t:'adj',m:'Có sương mù',ex:"It's <strong>foggy</strong> in Sydney."},
+  {w:'snowy',p:'/ˈsnəʊ.i/',t:'adj',m:'Có tuyết',ex:"It's <strong>snowy</strong> in Moscow."},
+  {w:'storm',p:'/stɔːm/',t:'noun',m:'Bão (gió mạnh + mưa)',ex:'There was a terrible <strong>storm</strong> last night.'},
+  {w:'hurricane',p:'/ˈhʌr.ɪ.keɪn/',t:'noun',m:'Bão rất mạnh',ex:'A <strong>hurricane</strong> can be very destructive.'},
+  {w:'thunderstorm',p:'/ˈθʌn.də.stɔːm/',t:'noun',m:'Giông bão (sấm + chớp + mưa)',ex:'We had a <strong>thunderstorm</strong> last night.'},
+  {w:'lightning',p:'/ˈlaɪt.nɪŋ/',t:'noun',m:'Tia chớp / sét',ex:'You see <strong>lightning</strong> before you hear thunder.'},
+  {w:'forecast',p:'/ˈfɔː.kɑːst/',t:'noun',m:'Dự báo thời tiết',ex:'Watch the weather <strong>forecast</strong> on TV.'},
+  {w:'leap year',p:'/liːp jɪər/',t:'phrase',m:'Năm nhuận (366 ngày)',ex:'February has 29 days in a <strong>leap year</strong>.'},
+];
+const typeMap = {noun:'t-noun',phrase:'t-phrase',adj:'t-adv'};
+const typeLbl = {noun:'Noun',phrase:'Phrase',adj:'Adjective'};
+const vfcEmoji = ['⏱','⏰','🕐','📅','📆','📜','🌌','✅','🏃','🕒','🕖','🕓','☀️','☁️','🌧️','💨','🌫️','❄️','🌀','🌪️','⛈️','⚡','📡','🐸'];
+
+// ===== NAV =====
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function showPart(id,btn){
+  const parent=btn.closest('.section')||btn.closest('.section.active');
+  btn.closest('.card,.section').querySelectorAll('.part-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.part-panel').forEach(p=>{if(p.id===id)p.classList.add('active');else if(p.closest('#'+id.split('-')[0]))p.classList.remove('active');});
+  // simpler: toggle by id prefix
+  const prefix=id.includes('listen')?'listen':id.includes('sp-')?'sp-':id.includes('hw-')?'hw-':null;
+  if(prefix){
+    document.querySelectorAll(`[id^="${prefix}"]`).forEach(p=>{
+      if(p.classList.contains('part-panel')) p.classList.remove('active');
+    });
+  }
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== WARMUP =====
+const wuItems=[
+  {num:1,emoji:'⏰',lbl:'Picture 1',ans:'A. wake up'},
+  {num:2,emoji:'☀️',lbl:'Picture 2',ans:'B. sunny day'},
+  {num:3,emoji:'🌧️',lbl:'Picture 3',ans:'C. rainy day'},
+  {num:4,emoji:'🕒',lbl:'Picture 4',ans:'D. tell the time'},
+  {num:5,emoji:'❄️',lbl:'Picture 5',ans:'E. cold / snowy'},
+  {num:6,emoji:'📅',lbl:'Picture 6',ans:'F. check the calendar'},
+];
+let wuPicked=null, wuDone={};
+function buildWarmup(){
+  wuPicked=null; wuDone={};
+  document.getElementById('wu-imgs').innerHTML=wuItems.map(it=>
+    `<div class="img-card" id="wuimg-${it.num}" onclick="pickWuImg(${it.num})">
+      <span class="img-num">${it.num}</span>
+      <div class="img-card-inner"><span class="big-emoji">${it.emoji}</span>
+      <div class="img-lbl" id="wulbl-${it.num}">${it.lbl}</div></div>
+    </div>`).join('');
+  const sh=[...wuItems].sort(()=>Math.random()-.5);
+  document.getElementById('wu-answers').innerHTML=sh.map(it=>
+    `<div class="ans-chip" id="wuans-${it.num}" onclick="pickWuAns(${it.num},'${it.ans}')">${it.ans}</div>`).join('');
+  document.getElementById('wu-score').innerHTML='';
+}
+function pickWuImg(n){
+  document.querySelectorAll('.img-card').forEach(c=>c.classList.remove('selected'));
+  if(wuDone[n]) return;
+  document.getElementById('wuimg-'+n).classList.add('selected');
+  wuPicked=n;
+}
+function pickWuAns(n,lbl){
+  if(!wuPicked) return;
+  if(Object.values(wuDone).some(v=>v.num===n)) return;
+  wuDone[wuPicked]={num:n,lbl};
+  document.getElementById('wulbl-'+wuPicked).textContent=lbl;
+  document.getElementById('wuimg-'+wuPicked).classList.remove('selected');
+  document.getElementById('wuans-'+n).classList.add('used');
+  wuPicked=null;
+}
+function checkWarmup(){
+  let ok=0;
+  wuItems.forEach(it=>{
+    const el=document.getElementById('wuimg-'+it.num);
+    const d=wuDone[it.num];
+    if(!d) return;
+    if(d.num===it.num){el.classList.add('correct');ok++;}
+    else el.classList.add('incorrect');
+  });
+  document.getElementById('wu-score').innerHTML=
+    `<div class="result-msg ${ok===wuItems.length?'ok':'bad'}">${ok===wuItems.length?'🎉 Xuất sắc!':'📝 Cố lên!'} Đúng ${ok}/${wuItems.length}</div>`;
+}
+function resetWarmup(){buildWarmup();}
+
+// ===== VOCAB FLASHCARDS =====
+function buildVfc(){
+  document.getElementById('vfc-grid').innerHTML=vocabData.map((v,i)=>
+    `<div class="vfc" onclick="this.classList.toggle('flipped')">
+      <div class="vfc-inner">
+        <div class="vfc-front"><div class="ve">${vfcEmoji[i]||'📖'}</div>
+          <div class="vw">${v.w}</div><div class="vp">${v.p}</div></div>
+        <div class="vfc-back"><div class="vm">${v.m}</div>
+          <div class="vex">${v.ex}</div></div>
+      </div></div>`).join('');
+}
+function flipAll(open){document.querySelectorAll('.vfc').forEach(c=>open?c.classList.add('flipped'):c.classList.remove('flipped'));}
+function buildVtable(data){
+  document.getElementById('vtbody').innerHTML=data.map(v=>
+    `<tr><td><span class="wrd">${v.w}</span></td><td><span class="prn">${v.p}</span></td>
+    <td><span class="type-badge ${typeMap[v.t]||'t-noun'}">${typeLbl[v.t]||v.t}</span></td>
+    <td>${v.m}</td><td style="color:var(--muted);font-size:12px;">${v.ex}</td></tr>`).join('');
+}
+function filterVocab(q){buildVtable(vocabData.filter(v=>v.w.toLowerCase().includes(q.toLowerCase())||v.m.toLowerCase().includes(q.toLowerCase())));}
+
+// ===== CLOCK QUIZ =====
+const clockData=[
+  {display:'🕑 2:00',opts:["It's two o'clock","It's half past two","It's two past twelve","It's a quarter to two"],ans:0},
+  {display:'🕓 4:15',opts:["It's four fifteen","It's a quarter past four","It's a quarter to four","It's half past four"],ans:1},
+  {display:'🕢 7:30',opts:["It's seven thirty","It's a quarter to eight","It's half past seven","It's seven past thirty"],ans:2},
+  {display:'🕐 1:45',opts:["It's a quarter past one","It's half past one","It's a quarter to two","It's one forty-five past"],ans:2},
+  {display:'🕘 9:50',opts:["It's nine fifty","It's ten to ten","It's ten past nine","It's a quarter to ten"],ans:1},
+];
+let clockAnswers={};
+function buildClockQuiz(){
+  clockAnswers={};
+  document.getElementById('clock-quiz').innerHTML=clockData.map((q,i)=>
+    `<div class="quiz-item"><div class="quiz-q">${i+1}. ${q.display} — How do you say this time?</div>
+    <div class="quiz-opts">${q.opts.map((o,oi)=>
+      `<div class="quiz-opt" onclick="answerClock(this,${i},${oi},${q.ans})">${String.fromCharCode(65+oi)}. ${o}</div>`
+    ).join('')}</div></div>`).join('');
+  document.getElementById('clock-result').innerHTML='';
+}
+function answerClock(el,qi,oi,correct){
+  if(clockAnswers[qi]!==undefined) return;
+  clockAnswers[qi]=oi;
+  const opts=el.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  if(oi===correct) el.classList.add('correct');
+  else{el.classList.add('incorrect');opts[correct].classList.add('correct');}
+}
+function checkClockQuiz(){
+  const ok=Object.entries(clockAnswers).filter(([i,v])=>v===clockData[i].ans).length;
+  document.getElementById('clock-result').innerHTML=
+    `<div class="result-msg ${ok===clockData.length?'ok':'bad'}">${ok===clockData.length?'🎉 Tuyệt vời!':'📝 Cố lên!'} Đúng ${ok}/${clockData.length}</div>`;
+}
+
+// ===== TIME QUIZ =====
+const timeQuizData=[
+  {q:'My birthday is ___ July.',opts:['on','in','at','during'],ans:1},
+  {q:'I went to the cinema ___ the weekend.',opts:['in','on','at','for'],ans:2},
+  {q:'I saw her ___ Friday evening.',opts:['in','at','on','during'],ans:2},
+  {q:'She has been learning English ___ three years.',opts:['since','during','for','by'],ans:2},
+  {q:"I'll be at the office ___ 9 A.M. [not later than]",opts:['until','by','for','during'],ans:1},
+  {q:"I worked on a farm ___ the summer. [tells you when]",opts:['for','since','during','in'],ans:2},
+  {q:'I got up four hours ___, at 6 o\'clock.',opts:['since','before','ago','for'],ans:2},
+  {q:"___ the moment, Nora is in Paris.",opts:['For','At','In','On'],ans:1},
+];
+let tqAnswers={};
+function buildTimeQuiz(){
+  tqAnswers={};
+  document.getElementById('time-quiz').innerHTML=timeQuizData.map((q,i)=>
+    `<div class="quiz-item"><div class="quiz-q">${i+1}. ${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,oi)=>
+      `<div class="quiz-opt" onclick="answerTQ(this,${i},${oi},${q.ans})">${String.fromCharCode(65+oi)}. ${o}</div>`
+    ).join('')}</div></div>`).join('');
+  document.getElementById('time-quiz-score').innerHTML='';
+  document.getElementById('tq-prog').style.width='0%';
+}
+function answerTQ(el,qi,oi,correct){
+  if(tqAnswers[qi]!==undefined) return;
+  tqAnswers[qi]=oi;
+  const opts=el.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  if(oi===correct) el.classList.add('correct');
+  else{el.classList.add('incorrect');opts[correct].classList.add('correct');}
+  document.getElementById('tq-prog').style.width=(Object.keys(tqAnswers).length/timeQuizData.length*100)+'%';
+  if(Object.keys(tqAnswers).length===timeQuizData.length){
+    const ok=Object.entries(tqAnswers).filter(([i,v])=>v===timeQuizData[i].ans).length;
+    document.getElementById('time-quiz-score').innerHTML=
+      `<div class="score-b">🏆 ${ok}/${timeQuizData.length}</div>
+       <button class="btn btn-secondary" style="margin-left:8px;" onclick="buildTimeQuiz()">🔄 Chơi lại</button>`;
+  }
+}
+
+// ===== WEATHER QUIZ =====
+const weatherQuizData=[
+  {q:'What do we call very strong wind?',opts:['storm','hurricane','fog','cloud'],ans:1},
+  {q:'"It\'s ___ today." (trời có mây)',opts:['winding','clouding','cloudy','cloud'],ans:2},
+  {q:'What is a thunderstorm?',opts:['Only heavy rain','Only strong wind','Thunder + lightning + rain','Fog + cold'],ans:2},
+  {q:'"What\'s the weather ___?" means "How\'s the weather?"',opts:['as','like','look','similar'],ans:1},
+  {q:'Which adjective is WRONG?',opts:['sunny','windy','foggy','raining'],ans:3},
+  {q:'"It\'s raining in Barcelona but ___ in Granada."',opts:['the sun shines','sun is shining','the sun is shining','sunning'],ans:2},
+];
+let wqAnswers={};
+function buildWeatherQuiz(){
+  wqAnswers={};
+  document.getElementById('weather-quiz').innerHTML=weatherQuizData.map((q,i)=>
+    `<div class="quiz-item"><div class="quiz-q">${i+1}. ${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,oi)=>
+      `<div class="quiz-opt" onclick="answerWQ(this,${i},${oi},${q.ans})">${String.fromCharCode(65+oi)}. ${o}</div>`
+    ).join('')}</div></div>`).join('');
+  document.getElementById('weather-quiz-score').innerHTML='';
+  document.getElementById('wq-prog').style.width='0%';
+}
+function answerWQ(el,qi,oi,correct){
+  if(wqAnswers[qi]!==undefined) return;
+  wqAnswers[qi]=oi;
+  const opts=el.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  if(oi===correct) el.classList.add('correct');
+  else{el.classList.add('incorrect');opts[correct].classList.add('correct');}
+  document.getElementById('wq-prog').style.width=(Object.keys(wqAnswers).length/weatherQuizData.length*100)+'%';
+  if(Object.keys(wqAnswers).length===weatherQuizData.length){
+    const ok=Object.entries(wqAnswers).filter(([i,v])=>v===weatherQuizData[i].ans).length;
+    document.getElementById('weather-quiz-score').innerHTML=
+      `<div class="score-b">🏆 ${ok}/${weatherQuizData.length}</div>
+       <button class="btn btn-secondary" style="margin-left:8px;" onclick="buildWeatherQuiz()">🔄 Chơi lại</button>`;
+  }
+}
+
+// ===== ACTIVITIES: FILL =====
+const fillData=[
+  {s:'There are 60 ___ in a minute.',b:'seconds'},
+  {s:'She visits her grandparents every ___.',b:'month'},
+  {s:'A ___ has 12 months.',b:'year'},
+  {s:'The next meeting will be in a ___ (two weeks).',b:'fortnight'},
+  {s:"It's ___ past 4 = 4:30.",b:'half'},
+  {s:"It's a ___ past 4 = 4:15.",b:'quarter'},
+  {s:'The weather was ___ in London — it rained every day.',b:'wet'},
+  {s:'You see ___ before you hear thunder.',b:'lightning'},
+  {s:'A ___ is when there is strong wind and rain together.',b:'storm'},
+  {s:'It is very ___ in the Sahara — it rarely rains.',b:'dry'},
+];
+function buildFill(){
+  document.getElementById('fill-qs').innerHTML=fillData.map((item,i)=>{
+    const html=item.s.replace('___',`<input class="blank" data-ans="${item.b}" placeholder="...">`);
+    return `<div class="fill-s">${i+1}. ${html}</div>`;
+  }).join('');
+}
+function checkFill(){
+  let ok=0,total=0;
+  document.querySelectorAll('#fill-qs .blank').forEach(inp=>{
+    total++;
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('fill-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Hoàn hảo!':'⚠️'} Đúng ${ok}/${total}</div>`;
+}
+function resetFill(){
+  document.querySelectorAll('#fill-qs .blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById('fill-result').innerHTML='';
+}
+
+// ===== ACTIVITIES: MATCH =====
+const matchPairs=[
+  {w:'fortnight',d:'Hai tuần'},
+  {w:'century',d:'Thế kỷ (100 năm)'},
+  {w:'on time',d:'Đúng giờ'},
+  {w:'in time',d:'Kịp giờ'},
+  {w:'hurricane',d:'Bão rất mạnh'},
+  {w:'foggy',d:'Có sương mù'},
+  {w:'thunder',d:'Tiếng sấm'},
+  {w:'leap year',d:'Năm nhuận'},
+];
+let matchSel=null,matchScore=0;
+function initMatch(){
+  matchSel=null; matchScore=0;
+  const pairs=[...matchPairs].sort(()=>Math.random()-.5).slice(0,6);
+  const ws=[...pairs].sort(()=>Math.random()-.5);
+  const ds=[...pairs].sort(()=>Math.random()-.5);
+  document.getElementById('match-words').innerHTML=ws.map(p=>`<div class="match-item" data-w="${p.w}" onclick="selMatch(this,'w')">${p.w}</div>`).join('');
+  document.getElementById('match-defs').innerHTML=ds.map(p=>`<div class="match-item" data-w="${p.w}" onclick="selMatch(this,'d')">${p.d}</div>`).join('');
+  document.getElementById('match-score').innerHTML='';
+}
+function selMatch(el,type){
+  if(el.classList.contains('correct')) return;
+  if(!matchSel){el.classList.add('selected');matchSel={el,type};return;}
+  if(matchSel.type===type){
+    document.querySelectorAll('.match-item.selected').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');matchSel={el,type};return;
+  }
+  const wEl=type==='w'?el:matchSel.el, dEl=type==='d'?el:matchSel.el;
+  if(wEl.dataset.w===dEl.dataset.w){
+    wEl.classList.remove('selected');dEl.classList.remove('selected');
+    wEl.classList.add('correct');dEl.classList.add('correct');
+    matchScore++;
+    const total=document.querySelectorAll('#match-words .match-item').length;
+    document.getElementById('match-score').innerHTML=`<div class="score-b">⭐ ${matchScore}/${total}</div>${matchScore===total?'<div class="result-msg ok">🎉 Xuất sắc!</div>':''}`;
+  } else {
+    wEl.classList.add('incorrect');dEl.classList.add('incorrect');
+    setTimeout(()=>{wEl.classList.remove('incorrect','selected');dEl.classList.remove('incorrect','selected');},500);
+  }
+  matchSel=null;
+}
+
+// ===== ACTIVITIES: SORT =====
+const sortData=[
+  {words:['It','is','half','past','seven','now.'],answer:"It is half past seven now."},
+  {words:['My','birthday','is','in','July.'],answer:"My birthday is in July."},
+  {words:['Does','it','usually','snow','in','winter','here?'],answer:"Does it usually snow in winter here?"},
+  {words:['The','sun','is','shining','but','it','is','cold.'],answer:"The sun is shining but it is cold."},
+  {words:['I','always','go','to','bed','at','the','weekend.'],answer:"I always go to bed at the weekend."},
+];
+function buildSort(){
+  document.getElementById('sort-qs').innerHTML=sortData.map((q,i)=>{
+    const sh=[...q.words].sort(()=>Math.random()-.5);
+    return `<div class="card" style="margin-bottom:12px;">
+      <div style="font-weight:700;margin-bottom:7px;color:var(--muted);font-size:12px;">Câu ${i+1}:</div>
+      <div class="word-bank" id="sb-${i}">${sh.map(w=>`<div class="wchip" onclick="placeW(this,${i},'${w.replace(/'/g,"\\'")}' )">${w}</div>`).join('')}</div>
+      <div class="sort-tgt" id="st-${i}" data-ans="${q.answer}"></div>
+      <div style="display:flex;gap:7px;margin-top:8px;">
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;" onclick="checkSort(${i})">✅ Kiểm tra</button>
+        <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;" onclick="resetSort(${i})">🔄 Reset</button>
+      </div>
+      <div id="sr-${i}" style="margin-top:7px;"></div>
+    </div>`;
+  }).join('');
+}
+function placeW(el,qi,word){
+  if(el.classList.contains('used')) return;
+  el.classList.add('used');
+  const chip=document.createElement('div');chip.className='placed';chip.textContent=word;
+  chip.onclick=()=>{chip.remove();el.classList.remove('used');};
+  document.getElementById('st-'+qi).appendChild(chip);
+}
+function checkSort(qi){
+  const tgt=document.getElementById('st-'+qi);
+  const placed=Array.from(tgt.querySelectorAll('.placed')).map(c=>c.textContent).join(' ');
+  const ans=tgt.dataset.ans;
+  const ok=placed.replace(/[?.]/g,'').toLowerCase()===ans.replace(/[?.]/g,'').toLowerCase();
+  document.getElementById('sr-'+qi).innerHTML=ok
+    ?`<div class="result-msg ok">🎉 Chính xác!</div>`
+    :`<div class="result-msg bad">❌ Đáp án: <em>${ans}</em></div>`;
+}
+function resetSort(qi){
+  document.getElementById('st-'+qi).innerHTML='';
+  document.getElementById('sr-'+qi).innerHTML='';
+  document.querySelectorAll(`#sb-${qi} .wchip`).forEach(c=>c.classList.remove('used'));
+}
+
+// ===== PREPOSITIONS =====
+const prepData=[
+  {s:'My birthday is ___ August.',opts:['on','in','at','during'],ans:'in'},
+  {s:'I saw her ___ Friday.',opts:['in','on','at','for'],ans:'on'},
+  {s:"I'll be at the office ___ 8 A.M. [not later than]",opts:['until','by','since','during'],ans:'by'},
+  {s:"I've worked here ___ May. [point in time]",opts:['for','since','until','during'],ans:'since'},
+  {s:"I've worked here ___ six months. [period of time]",opts:['since','during','for','by'],ans:'for'},
+  {s:'I went to the cinema ___ the weekend.',opts:['in','on','at','during'],ans:'at'},
+  {s:'I worked on a farm ___ the summer. [when]',opts:['for','during','since','by'],ans:'during'},
+  {s:'Birds sing ___ (the) spring.',opts:['on','at','in','during'],ans:'in'},
+];
+function buildPrep(){
+  document.getElementById('prep-qs').innerHTML=prepData.map((item,i)=>{
+    const opts=['--',...item.opts].map(o=>`<option value="${o}">${o}</option>`).join('');
+    const html=item.s.replace('___',`<select class="inline-select" id="pr-${i}" data-ans="${item.ans}"><option value="">--</option>${item.opts.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`);
+    return `<div class="fill-s">${i+1}. ${html}</div>`;
+  }).join('');
+}
+function checkPrep(){
+  let ok=0,total=prepData.length;
+  prepData.forEach((_,i)=>{
+    const sel=document.getElementById('pr-'+i);
+    const isOk=sel.value===sel.dataset.ans;
+    sel.className='inline-select '+(isOk?'ok':'bad');
+    if(isOk) ok++;
+  });
+  document.getElementById('prep-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Hoàn hảo!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+function resetPrep(){
+  prepData.forEach((_,i)=>{const sel=document.getElementById('pr-'+i);sel.value='';sel.className='inline-select';});
+  document.getElementById('prep-result').innerHTML='';
+}
+
+// ===== ACT QUIZ =====
+const actQuizData=[
+  {q:'Which sentence is correct?',opts:["My birthday is on July.","My birthday is in July.","My birthday is at July.","My birthday is during July."],ans:1},
+  {q:'"I\'ll be here ___ 4:30" means I won\'t leave before 4:30.',opts:['by','until','for','since'],ans:1},
+  {q:'How do you say 3:45?',opts:["It's three forty-five past.","It's a quarter to four.","It's a quarter past three.","It's half past three."],ans:1},
+  {q:'"It\'s ___ in London today" — which is WRONG?',opts:['cloudy','rainy','windy','raining'],ans:3},
+  {q:'Saturday + Sunday = ___',opts:['the holiday','the break','the weekend','the end'],ans:2},
+  {q:'"I saw her ___ Friday evening."',opts:['in','at','on','during'],ans:2},
+  {q:'A ___ is when there is thunder, lightning and rain.',opts:['hurricane','fog','thunderstorm','wind'],ans:2},
+  {q:'"It is ___ at the moment" — Nora is in Paris.',opts:['rainy','warm','snowy','cold'],ans:1},
+];
+let aqAnswers={};
+function buildActQuiz(){
+  aqAnswers={};
+  document.getElementById('act-quiz-items').innerHTML=actQuizData.map((q,i)=>
+    `<div class="quiz-item"><div class="quiz-q">${i+1}. ${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,oi)=>
+      `<div class="quiz-opt" onclick="answerAQ(this,${i},${oi},${q.ans})">${String.fromCharCode(65+oi)}. ${o}</div>`
+    ).join('')}</div></div>`).join('');
+  document.getElementById('act-quiz-total').innerHTML='';
+  document.getElementById('act-quiz-prog').style.width='0%';
+}
+function answerAQ(el,qi,oi,correct){
+  if(aqAnswers[qi]!==undefined) return;
+  aqAnswers[qi]=oi;
+  const opts=el.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  if(oi===correct) el.classList.add('correct');
+  else{el.classList.add('incorrect');opts[correct].classList.add('correct');}
+  document.getElementById('act-quiz-prog').style.width=(Object.keys(aqAnswers).length/actQuizData.length*100)+'%';
+  if(Object.keys(aqAnswers).length===actQuizData.length){
+    const ok=Object.entries(aqAnswers).filter(([i,v])=>v===actQuizData[i].ans).length;
+    document.getElementById('act-quiz-total').innerHTML=
+      `<div class="score-b">🏆 Kết quả: ${ok}/${actQuizData.length}</div>
+       <button class="btn btn-secondary" style="margin-top:6px;" onclick="buildActQuiz()">🔄 Chơi lại</button>`;
+  }
+}
+
+// ===== LISTEN FILL =====
+function checkListenFill(resultId){
+  let ok=0,total=0;
+  const container=document.getElementById(resultId).closest('.card');
+  container.querySelectorAll('.blank').forEach(inp=>{
+    total++;
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById(resultId).innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Hoàn hảo!':'⚠️'} Đúng ${ok}/${total}</div>`;
+}
+function resetListenFill(resultId){
+  const container=document.getElementById(resultId).closest('.card');
+  container.querySelectorAll('.blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById(resultId).innerHTML='';
+}
+function checkWeatherFill(){
+  const ids=['wf1','wf2','wf3','wf4','wf5','wf6','wf7','wf8','wf9','wf10'];
+  let ok=0;
+  ids.forEach(id=>{
+    const inp=document.getElementById(id);
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('wf-result').innerHTML=
+    `<div class="result-msg ${ok===ids.length?'ok':'bad'}">${ok===ids.length?'🎉 Hoàn hảo!':'⚠️'} Đúng ${ok}/${ids.length}</div>`;
+}
+function resetWeatherFill(){
+  ['wf1','wf2','wf3','wf4','wf5','wf6','wf7','wf8','wf9','wf10'].forEach(id=>{
+    const inp=document.getElementById(id);inp.value='';inp.className='blank';
+  });
+  document.getElementById('wf-result').innerHTML='';
+}
+
+// ===== WORD COUNT =====
+function countWords(){
+  const t=document.getElementById('writing-area').value.trim();
+  const c=t?t.split(/\s+/).length:0;
+  const el=document.getElementById('word-count');
+  el.textContent=c;
+  el.style.color=(c>=120&&c<=150)?'var(--green)':c>150?'var(--red)':'var(--muted)';
+}
+function countHwWords(){
+  const t=document.getElementById('hw-writing-area').value.trim();
+  const c=t?t.split(/\s+/).length:0;
+  const el=document.getElementById('hw-word-count');
+  el.textContent=c;
+  el.style.color=(c>=120&&c<=150)?'var(--green)':c>150?'var(--red)':'var(--muted)';
+}
+
+// ===== HOMEWORK 1: TIME VOCAB =====
+const hw1Data=[
+  {s:'There are 60 ___ in a minute.',ans:'seconds'},
+  {s:'She visits her grandparents every ___.',ans:'fortnight'},
+  {s:'He\'s been studying English for three ___.',ans:'years'},
+  {s:'The ancient temple is more than a ___ old.',ans:'century'},
+  {s:'I\'ll call you back in a few ___.',ans:'minutes'},
+  {s:'They went on vacation for a ___.',ans:'fortnight'},
+  {s:'A ___ has 12 months.',ans:'year'},
+  {s:'The next meeting will be in a ___ (two weeks).',ans:'fortnight'},
+  {s:'The company has grown rapidly over the past ___.',ans:'decade'},
+  {s:'People will remember this event for the next ___.',ans:'millennium'},
+];
+function buildHw1(){
+  document.getElementById('hw1-qs').innerHTML=hw1Data.map((item,i)=>{
+    const html=item.s.replace('___',`<input class="blank" data-ans="${item.ans}" placeholder="...">`);
+    return `<div class="fill-s" style="font-size:14px;">${i+1}. ${html}</div>`;
+  }).join('');
+}
+function checkHw1(){
+  let ok=0,total=hw1Data.length;
+  document.querySelectorAll('#hw1-qs .blank').forEach(inp=>{
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a||v===a.replace(/s$/,''));
+    inp.classList.toggle('bad',!(v===a||v===a.replace(/s$/,'')));
+    if(v===a||v===a.replace(/s$/,'')) ok++;
+  });
+  document.getElementById('hw1-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Tuyệt vời!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+function resetHw1(){
+  document.querySelectorAll('#hw1-qs .blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById('hw1-result').innerHTML='';
+}
+
+// ===== HOMEWORK 2: APPROX TIME =====
+const hw2Data=[
+  {s:'I went to Egypt with my parents but that was ten years ago.',ans:'a long time ago'},
+  {s:'I went to the library three days ago.',ans:'the other day'},
+  {s:"I haven't been to the cinema for the last three weeks.",ans:'for ages'},
+  {s:"I haven't been to a concert for three or four years.",ans:'for ages'},
+  {s:'This computer will be fine for the next year.',ans:'for the time being'},
+];
+function buildHw2(){
+  document.getElementById('hw2-qs').innerHTML=hw2Data.map((item,i)=>{
+    return `<div class="fill-s" style="font-size:14px;">${i+2}. ${item.s}<br><span style="color:var(--muted);font-size:12px;">→</span> <input class="blank" style="width:200px;" data-ans="${item.ans}" placeholder="approximate expression..."></div>`;
+  }).join('');
+}
+function checkHw2(){
+  let ok=0,total=hw2Data.length;
+  document.querySelectorAll('#hw2-qs .blank').forEach(inp=>{
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('hw2-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Xuất sắc!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+function resetHw2(){
+  document.querySelectorAll('#hw2-qs .blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById('hw2-result').innerHTML='';
+}
+
+// ===== HOMEWORK 4: QUICK QUIZ =====
+const hw4Data=[
+  {q:'How many minutes are there in a quarter of an hour?',ans:'15'},
+  {q:'What is the third day of the week?',ans:'Tuesday'},
+  {q:'How many seconds are there in five minutes?',ans:'300'},
+  {q:'What is the seventh month?',ans:'July'},
+  {q:'How many months are there in ten years?',ans:'120'},
+];
+function buildHw4(){
+  document.getElementById('hw4-quiz').innerHTML=hw4Data.map((item,i)=>
+    `<div class="fill-s" style="font-size:14px;margin-bottom:10px;">${i+1}. ${item.q}<br>
+    <input class="blank" style="width:150px;margin-top:6px;" data-ans="${item.ans}" placeholder="Answer..."></div>`
+  ).join('');
+  document.getElementById('hw4-result').innerHTML='';
+}
+function checkHw4(){
+  let ok=0,total=hw4Data.length;
+  document.querySelectorAll('#hw4-quiz .blank').forEach(inp=>{
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('hw4-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Tuyệt vời!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+
+// ===== HOMEWORK: CAL UNIT =====
+function checkCalUnit(){
+  let ok=0,total=0;
+  document.querySelectorAll('#hw-time .card .blank').forEach(inp=>{
+    if(!inp.closest('#hw1-qs')&&!inp.closest('#hw2-qs')&&!inp.closest('#hw4-quiz')){
+      total++;
+      const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+      inp.classList.toggle('ok',v===a||v.includes(a.split(' ').pop()));
+      inp.classList.toggle('bad',!(v===a||v.includes(a.split(' ').pop())));
+      if(v===a||v.includes(a.split(' ').pop())) ok++;
+    }
+  });
+}
+function resetCalUnit(){}
+
+// song check
+function checkSong(){
+  let ok=0,total=0;
+  document.querySelectorAll('#hw-calendar .blank').forEach(inp=>{
+    total++;
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('song-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Tuyệt vời!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+function resetSong(){
+  document.querySelectorAll('#hw-calendar .blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById('song-result').innerHTML='';
+}
+function showMistakeKey(){
+  const el=document.getElementById('mistake-key');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+// ===== HOMEWORK WEATHER FILL =====
+const hwWtData=[
+  {s:'The sun ___ every day last month.',ans:'shone'},
+  {s:'When it ___, I take my umbrella.',ans:'rains'},
+  {s:"What's the ___ like in your country in January?",ans:'weather'},
+  {s:'When it ___, we can go skiing.',ans:'snows'},
+  {s:'You see ___ before you hear thunder.',ans:'lightning'},
+  {s:'It is 24 ___ here today.',ans:'degrees'},
+  {s:'It is dangerous to be in a small boat at sea in a ___.',ans:'storm'},
+];
+function buildHwWt(){
+  document.getElementById('hw-wt-qs').innerHTML=hwWtData.map((item,i)=>{
+    const html=item.s.replace('___',`<input class="blank" data-ans="${item.ans}" placeholder="...">`);
+    return `<div class="fill-s" style="font-size:14px;">${i+1}. ${html}</div>`;
+  }).join('');
+}
+function checkHwWt(){
+  let ok=0,total=hwWtData.length;
+  document.querySelectorAll('#hw-wt-qs .blank').forEach(inp=>{
+    const v=inp.value.trim().toLowerCase(),a=inp.dataset.ans.toLowerCase();
+    inp.classList.toggle('ok',v===a); inp.classList.toggle('bad',v!==a);
+    if(v===a) ok++;
+  });
+  document.getElementById('hw-wt-result').innerHTML=
+    `<div class="result-msg ${ok===total?'ok':'bad'}">${ok===total?'🎉 Xuất sắc!':'📝 Cố lên!'} Đúng ${ok}/${total}</div>`;
+}
+function resetHwWt(){
+  document.querySelectorAll('#hw-wt-qs .blank').forEach(inp=>{inp.value='';inp.className='blank';});
+  document.getElementById('hw-wt-result').innerHTML='';
+}
+
+// ===== SHOW ACTIVITY =====
+function showAct(id,btn){
+  document.querySelectorAll('.act-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.act-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('act-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== INIT =====
+buildWarmup();
+buildVfc();
+buildVtable(vocabData);
+buildClockQuiz();
+buildTimeQuiz();
+buildWeatherQuiz();
+buildFill();
+initMatch();
+buildSort();
+buildPrep();
+buildActQuiz();
+buildHw1();
+buildHw2();
+buildHw4();
+buildHwWt();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done - $(wc -c < /mnt/user-data/outputs/Lesson5_Time_Weather.html) bytes"
