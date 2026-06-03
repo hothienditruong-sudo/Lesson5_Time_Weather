@@ -6,6 +6,17 @@
 <title>Lesson 5 — Time & Weather</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+  .watermark{
+  position:fixed;
+  bottom:12px;
+  right:12px;
+  font-size:12px;
+  font-weight:800;
+  color:rgba(0,0,0,0.15);
+  pointer-events:none;
+  z-index:9999;
+  user-select:none;
+}
 :root{
   --sky:#0ea5e9; --sky-l:#e0f2fe;
   --sun:#f59e0b; --sun-l:#fef3c7;
@@ -216,7 +227,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:#1e293b;line-hei
 </style>
 </head>
 <body>
-
+<div class="watermark">
+  © Ms Di English
+</div>
 <!-- HERO -->
 <div class="hero">
   <div class="badge">📘 Lesson 5 · A1 → A2</div>
@@ -1580,7 +1593,15 @@ function showAct(id,btn){
   document.getElementById('act-'+id).classList.add('active');
   btn.classList.add('active');
 }
-
+<footer style="
+text-align:center;
+padding:20px;
+font-size:13px;
+color:#64748b;
+font-weight:700;">
+© 2026 Ms Di English. All rights reserved.
+</footer>
+  
 // ===== INIT =====
 buildWarmup();
 buildVfc();
